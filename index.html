@@ -1,0 +1,208 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>GCE E-Bonafide Certificate Portal</title>
+  <style>
+    :root{--blue:#0b63d6;--light:#f6f9ff;--muted:#666}
+    body{font-family:Inter,system-ui,Arial;background:var(--light);margin:0;color:#111}
+    header{background:linear-gradient(90deg,var(--blue),#1e90ff);color:white;padding:18px 20px}
+    .container{max-width:920px;margin:22px auto;padding:18px;background:white;border-radius:10px;box-shadow:0 6px 18px rgba(20,40,80,0.08)}
+    h1,h2{margin:6px 0}
+    .hero{display:flex;gap:18px;align-items:center}
+    .hero .left{flex:1}
+    button.primary{background:var(--blue);color:white;padding:10px 14px;border:0;border-radius:8px;cursor:pointer}
+    form .row{display:flex;gap:12px}
+    label{display:block;font-size:13px;margin-bottom:6px}
+    input[type=text],input[type=email],select,textarea{width:100%;padding:9px;border-radius:8px;border:1px solid #ddd}
+    .small{font-size:13px;color:var(--muted)}
+    nav.tabs{display:flex;gap:8px;margin-bottom:12px}
+    nav.tabs button{background:#eef3ff;border:0;padding:8px 10px;border-radius:8px;cursor:pointer}
+    .hidden{display:none}
+    .file-preview{font-size:13px;background:#f7f9fb;padding:8px;border-radius:8px}
+    .tracker{display:flex;gap:12px;justify-content:space-between;margin-top:12px}
+    .step{flex:1;padding:10px;border-radius:8px;background:#f5f7fb;text-align:center}
+    .step.done{background:linear-gradient(90deg,#bfe3ff,var(--blue));color:white}
+    .app-list{margin-top:10px}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:8px;border-bottom:1px solid #eee;text-align:left}
+    footer{font-size:13px;color:var(--muted);text-align:center;margin:18px}
+    .admin-controls{margin-top:10px}
+  </style>
+</head>
+<body>
+  <header>
+    <div style="max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between">
+    <img src="images/logo.png"><div>
+        <strong>GCE</strong> E-Bonafide Certificate Portal
+      </div>
+      <div class="small">Government College of Engineering, Salem</div>
+    </div>
+  </header>  <div class="container" id="app">
+    <nav class="tabs">
+      <button onclick="show('welcome')">Welcome</button>
+      <button onclick="show('apply')">Application Form</button>
+      <button onclick="show('upload')">Upload & Reason</button>
+      <button onclick="show('status')">Application Status</button>
+      <button onclick="show('download')">Download Certificate</button>
+    </nav><section id="welcome">
+  <div class="hero">
+    <div class="left">
+      <h1>Hello, welcome GCEian!</h1>
+      <p class="small">Use this portal to apply for your Bonafide Certificate online. Click below to start your application.</p>
+      <p><button class="primary" onclick="show('apply')">Apply for Bonafide</button></p>
+    </div>
+    <div style="width:220px">
+      <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='140'><rect width='220' height='140' rx='10' fill='%230b63d6'/><text x='50%' y='50%' font-size='18' fill='white' text-anchor='middle' dominant-baseline='middle'>GCE</text></svg>" alt="logo" style="width:100%;border-radius:8px">
+    </div>
+  </div>
+</section>
+
+<section id="apply" class="hidden">
+  <h2>Bonafide Application Form</h2>
+  <form id="form1" onsubmit="saveDraft(event)">
+    <div class="row">
+      <div style="flex:1">
+        <label>Name</label>
+        <input id="name" required />
+      </div>
+      <div style="width:180px">
+        <label>Register No</label>
+        <input id="reg" required />
+      </div>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <div style="flex:1">
+        <label>Year / Branch</label>
+        <input id="yrbranch" placeholder="eg: 3rd Year / ECE" required />
+      </div>
+      <div style="width:140px">
+        <label>Hostler</label>
+        <select id="hostel"><option>Yes</option><option>No</option></select>
+      </div>
+    </div>
+    <div style="margin-top:10px" class="row">
+      <div style="flex:1">
+        <label>Mobile No</label>
+        <input id="mobile" required />
+      </div>
+      <div style="width:260px">
+        <label>Email</label>
+        <input id="email" type="email" />
+      </div>
+    </div>
+
+    <div style="margin-top:10px">
+      <label>Reason for Bonafide</label>
+      <select id="reason">
+        <option>Bank Loan</option>
+        <option>Passport</option>
+        <option>Scholarship / Award</option>
+        <option>Others</option>
+      </select>
+    </div>
+
+    <p style="margin-top:12px"><button class="primary" type="submit">Save & Continue</button> <button type="button" onclick="submitApplication()">Submit Application</button></p>
+    <p class="small">Tip: Save to keep a draft. After submit you will get an application ID.</p>
+  </form>
+</section>
+
+<section id="upload" class="hidden">
+  <h2>Upload Documents & Provide Valid Reason</h2>
+  <div id="currentDraft" class="small"></div>
+  <div style="margin-top:10px">
+    <label>Upload supporting documents (fee receipt, ID proofs, photo) - you can upload multiple</label>
+    <input id="files" type="file" multiple onchange="handleFiles(event)" />
+    <div id="previews"></div>
+  </div>
+  <div style="margin-top:10px">
+    <label>Detailed Reason (explain briefly)</label>
+    <textarea id="dreason" rows="5"></textarea>
+  </div>
+  <p style="margin-top:10px"><button class="primary" onclick="submitApplication()">Submit Application</button></p>
+  <p class="small">Files are stored locally (demo). For production replace with server storage and authentication.</p>
+</section>
+
+<section id="status" class="hidden">
+  <h2>Know Your Application Status</h2>
+  <div>
+    <label>Enter Application ID</label>
+    <input id="appid" /> <button onclick="loadApp()">Load</button>
+  </div>
+  <div id="statusArea" class="hidden">
+    <div class="tracker" id="tracker">
+      <div class="step" id="s1">1. Class Advisor</div>
+      <div class="step" id="s2">2. Head of Department</div>
+      <div class="step" id="s3">3. PA to Principal</div>
+      <div class="step" id="s4">4. Principal</div>
+    </div>
+    <div class="admin-controls small">
+      <p>Admin (demo): change status</p>
+      <button onclick="advance()">Advance Stage</button>
+      <button onclick="reject()">Reject Application</button>
+    </div>
+    <div id="statusInfo" style="margin-top:10px"></div>
+  </div>
+
+  <div class="app-list">
+    <h3>All Applications (demo view)</h3>
+    <table id="appTable"><thead><tr><th>ID</th><th>Name</th><th>Reg</th><th>Reason</th><th>Stage</th></tr></thead><tbody></tbody></table>
+  </div>
+</section>
+
+<section id="download" class="hidden">
+  <h2>Download Your E-Bonafide Certificate</h2>
+  <div>
+    <label>Enter Application ID</label>
+    <input id="downId" /> <button onclick="makePDF()">Download PDF</button>
+  </div>
+  <div id="downloadMsg" class="small"></div>
+</section>
+
+  </div>  <footer>Built for demo — replace local storage with server + authentication for production.</footer>  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>  <script>
+    // Simple single-file demo app storing data in localStorage.
+    const appKey = 'gce_bonafide_apps_v1';
+    function loadApps(){return JSON.parse(localStorage.getItem(appKey)||'{}')}
+    function saveApps(obj){localStorage.setItem(appKey, JSON.stringify(obj))}
+
+    function show(id){document.querySelectorAll('#app section').forEach(s=>s.classList.add('hidden'));document.getElementById(id).classList.remove('hidden');refreshTable();}
+    show('welcome');
+
+    function saveDraft(e){if(e) e.preventDefault();const apps=loadApps();const reg=document.getElementById('reg').value.trim();const id = reg||('APP'+Date.now());apps[id]=apps[id]||{};apps[id].name=document.getElementById('name').value;apps[id].reg=reg;apps[id].yrbranch=document.getElementById('yrbranch').value;apps[id].hostel=document.getElementById('hostel').value;apps[id].mobile=document.getElementById('mobile').value;apps[id].email=document.getElementById('email').value;apps[id].reason=document.getElementById('reason').value;apps[id].stage = apps[id].stage||0;saveApps(apps);alert('Draft saved. Your Application ID: '+id);document.getElementById('currentDraft').innerText='Draft ID: '+id}
+
+    async function handleFiles(e){const files=e.target.files;const previews=document.getElementById('previews');previews.innerHTML='';const apps=loadApps();const idInput=document.getElementById('reg').value.trim()||('APP'+Date.now());apps[idInput]=apps[idInput]||{};apps[idInput].files=apps[idInput].files||[];
+      for(const f of files){const data=await fileToBase64(f);apps[idInput].files.push({name:f.name,type:f.type,data});const div=document.createElement('div');div.className='file-preview';div.innerText=f.name;previews.appendChild(div)}
+      saveApps(apps);document.getElementById('currentDraft').innerText='Draft ID: '+idInput
+    }
+    function fileToBase64(file){return new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(fr.result);fr.readAsDataURL(file)})}
+
+    function submitApplication(){const apps=loadApps();const reg=document.getElementById('reg').value.trim();const id = reg||('APP'+Date.now());apps[id]=apps[id]||{};apps[id].name=document.getElementById('name').value||apps[id].name||'Unknown';apps[id].reg=reg||id;apps[id].yrbranch=document.getElementById('yrbranch').value||apps[id].yrbranch;apps[id].hostel=document.getElementById('hostel').value||apps[id].hostel;apps[id].mobile=document.getElementById('mobile').value||apps[id].mobile;apps[id].email=document.getElementById('email').value||apps[id].email;apps[id].reason=document.getElementById('reason').value||apps[id].reason;apps[id].dreason=document.getElementById('dreason').value||apps[id].dreason;apps[id].submittedAt=new Date().toISOString();apps[id].stage=0;apps[id].status='Pending';saveApps(apps);alert('Application submitted. Your Application ID: '+id);refreshTable();show('status');document.getElementById('appid').value=id;loadApp();}
+
+    function refreshTable(){const apps=loadApps();const tbody=document.querySelector('#appTable tbody');tbody.innerHTML='';for(const id in apps){const a=apps[id];const tr=document.createElement('tr');tr.innerHTML=`<td>${id}</td><td>${a.name||''}</td><td>${a.reg||''}</td><td>${a.reason||''}</td><td>${stageLabel(a.stage)}</td>`;tbody.appendChild(tr)} }
+
+    function stageLabel(s){if(s===0) return 'Submitted'; if(s===1) return 'Advisor Done'; if(s===2) return 'HOD Done'; if(s===3) return 'PA Done'; if(s===4) return 'Principal Approved'; if(s===-1) return 'Rejected'; return ''}
+
+    function loadApp(){const id=document.getElementById('appid').value.trim();const apps=loadApps();if(!apps[id]){alert('Application not found');return}document.getElementById('statusArea').classList.remove('hidden');updateTracker(apps[id]);document.getElementById('statusInfo').innerText='Name: '+(apps[id].name||'')+' | Reg: '+(apps[id].reg||id)+' | Status: '+stageLabel(apps[id].stage)}
+
+    function updateTracker(app){for(let i=1;i<=4;i++){const el=document.getElementById('s'+i);el.classList.remove('done');if(app.stage>=i) el.classList.add('done')}
+    }
+
+    function advance(){const id=document.getElementById('appid').value.trim();const apps=loadApps();if(!apps[id]){alert('Load an application first');return}if(apps[id].stage<4){apps[id].stage +=1;if(apps[id].stage===4) apps[id].status='Approved';saveApps(apps);updateTracker(apps[id]);document.getElementById('statusInfo').innerText='Status: '+stageLabel(apps[id].stage);refreshTable();}else alert('Already fully approved')}
+    function reject(){const id=document.getElementById('appid').value.trim();const apps=loadApps();if(!apps[id]){alert('Load an application first');return}apps[id].stage=-1;apps[id].status='Rejected';saveApps(apps);updateTracker(apps[id]);document.getElementById('statusInfo').innerText='Status: Rejected';refreshTable();}
+
+    async function makePDF(){const id=document.getElementById('downId').value.trim();const apps=loadApps();const app=apps[id];if(!app){document.getElementById('downloadMsg').innerText='Application not found';return}if(app.stage<4){document.getElementById('downloadMsg').innerText='Your application is not yet approved';return}
+      const {jsPDF} = window.jspdf;const doc=new jsPDF();doc.setFontSize(16);doc.text('Government College of Engineering, Salem',105,30,{align:'center'});doc.setFontSize(12);doc.text('E-Bonafide Certificate',105,44,{align:'center'});
+      doc.setFontSize(11);const yStart=60;doc.text(`Name: ${app.name}`,20,yStart);doc.text(`Register No: ${app.reg}`,20,yStart+8);doc.text(`Year / Branch: ${app.yrbranch||''}`,20,yStart+16);doc.text(`Purpose: ${app.reason||''}`,20,yStart+24);
+      doc.text('This is to certify that the above named student is pursuing their studies at GCE, Salem.',20,yStart+40);
+      doc.text('Date of Issue: '+(new Date().toLocaleDateString()),20,yStart+56);
+      doc.text('_____________________                       _____________________',20,yStart+86);
+      doc.text('Principal Seal',20,yStart+96);
+      doc.save('E-Bonafide-'+(app.reg||id)+'.pdf');
+    }
+
+    // On load, refresh table
+    refreshTable();
+  </script></body>
+</html>
